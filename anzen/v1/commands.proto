@@ -17,18 +17,19 @@ message RegisterResponse {
   // key: device ID
   // value: device
   map<string, Device> devices = 2;
+  // Map of plugins
   map<string, Plugin> plugins = 3;
 
+  // Options (toml) for current plugin
   string plugin_opts = 4;
 
+  // Security token token to be used in further communication
   SecurityToken token = 5;
-  /* string origin = 4; */
 }
 
 message Command {
   CommandType command_type = 1;
 
-  /* SecurityToken token = 2; */
   string origin = 2;
 
   string data = 3;
@@ -46,13 +47,9 @@ enum CommandType {
   COMMAND_TYPE_INFO = 2;
 }
 
-message CommandRequest {
-  /* SecurityToken token = 1; */
-}
+message CommandRequest {}
 
-message InfoRequest {
-  /* SecurityToken token = 1; */
-}
+message InfoRequest {}
 
 message InfoResponse {
   bool armed = 1;

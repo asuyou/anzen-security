@@ -26,9 +26,7 @@ message EventResponse {
   Event event = 1;
 }
 
-message EventRequest {
-  /* SecurityToken token = 1; */
-}
+message EventRequest {}
 
 message PostSingleEventRequest {
   Event event = 1;
