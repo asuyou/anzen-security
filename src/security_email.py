@@ -42,8 +42,3 @@ class EmailClient:
             print(e)
             
 
-if __name__ == "__main__":
-    client = EmailClient("Security <anzen@asyo.dev>", "email-smtp.eu-west-2.amazonaws.com", 587)
-    client.login("AKIAYT7FJXDURUVBJWNF", "BLylydG99rOyAy49Bt8r4OXxhUZiAY/qC3q5lFQHXWiD")
-    client.send_email(["Asyo <a@asyo.dev>"], "Testing SMPT Auto", "This is a security test")
-

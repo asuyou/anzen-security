@@ -1,7 +1,7 @@
 from collections.abc import AsyncIterable
 import grpc
 import anzen.v1.anzen_pb2_grpc as anzen_pb2_grpc
-from anzen.v1 import events_pb2, security_pb2, commands_pb2, plugins_pb2
+from anzen.v1 import anzen_pb2, events_pb2, security_pb2, commands_pb2, plugins_pb2
 import tomli
 
 class Client:
@@ -41,13 +41,21 @@ class Client:
         for event in response:
             yield event
 
-    async def command_stream(self) -> AsyncIterable[commands_pb2.CommandResponse] :
+    async def command_stream(self) -> AsyncIterable[commands_pb2.CommandResponse]:
         command_request = commands_pb2.CommandRequest()
 
         response = self.stub.Command(request=command_request, metadata=self._metadata)
 
         for command in response:
             yield command
+
+    async def combined_stream(self) -> AsyncIterable[anzen_pb2.EventCommandResponse]:
+        request = anzen_pb2.EventCommandRequest()
+
+        stream = self.stub.EventCommand(request, metadata=self._metadata)
+
+        for response in stream:
+            yield response
 
     async def info(self) -> commands_pb2.InfoResponse:
         info_request = commands_pb2.InfoRequest()

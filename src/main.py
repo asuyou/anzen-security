@@ -24,7 +24,7 @@ class Main:
         email_server = self.opts["email"]["server_ip"]
         email_port = self.opts["email"]["port"]
 
-        target_emails = self.opts["send_mail"]
+        target_emails = self.opts["email"]["send_mail"]
 
         self.emails: Queue[str] = Queue()
         
@@ -33,13 +33,33 @@ class Main:
             address = email["address"] 
             self.emails.insert(address, priority)
 
-        self.emailClient = EmailClient(sender_email, email_server, email_port)
-        self.emailClient.login(sender_name, sender_pwd)
+        # self.emailClient = EmailClient(sender_email, email_server, email_port)
+        # self.emailClient.login(sender_name, sender_pwd)
+
+        self.tasks = set()
 
     async def handle_all(self):
-        pass
+        def add_task(task):
+            task = asyncio.create_task(task)
+            self.tasks.add(task)
+            task.add_done_callback(self.tasks.discard)
+
+        async for message in self.client.combined_stream():
+            if message.command:
+                add_task(self.handle_command(message.command))
+
+            if message.event:
+                add_task(self.handle_event(message.event))
+
+            await asyncio.sleep(0)
+
+    async def run_tasks(self):
+        for task in self.tasks:
+            await task
 
     async def handle_event(self, event: events_pb2.Event):
+        print("event")
+        print(event)
         if event.arm_status != ARM_STATUS_ARMED:
             return
 
@@ -48,9 +68,13 @@ class Main:
         data = await self.client.info()
         
         if data.armed:
-            await self.dispatch_emails(event)
+            print("Armed")
+            # await self.dispatch_emails(event)
+        print("event-end")
 
     async def handle_command(self, command: commands_pb2.Command):
+        print("command")
+        print(command)
         if command.command_type != commands_pb2.COMMAND_TYPE_INFO:
             return
 
@@ -59,6 +83,8 @@ class Main:
         command_type = data.get("request")
         priority = data.get("priority")
         email = data.get("email")
+
+        print("command-end")
 
         if not command_type or not priority or not email:
             print(f"{data} does not contain required data")
@@ -81,10 +107,16 @@ class Main:
         Extra data: {event.extra_data}
         """
         
-        while (email := queue_copy.remove()) != None:
-            self.emailClient.send_email([email], "Triggered security event", message)
+        # while (email := queue_copy.remove()) != None:
+        #     self.emailClient.send_email([email], "Triggered security event", message)
 
+async def main():
+    main = Main()
+    make_event = asyncio.create_task(main.handle_all())
+    run_task = asyncio.create_task(main.run_tasks())
+    await run_task
+    await make_event
 
 if __name__ == "__main__":
-    # asyncio.run(main(client))
+    asyncio.run(main())
     pass
