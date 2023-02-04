@@ -5,6 +5,9 @@ import random
 
 T = TypeVar('T')
 
+# Idea of array heavily adapted from:
+# https://www.geeksforgeeks.org/binary-heap/
+
 @dataclass
 class Position(Generic[T]):
     data: T
@@ -92,10 +95,9 @@ class Queue(Generic[T]):
         current = pos
         priority = self.array[pos].priority
         
-        while parent >= 0 and priority < self.array[parent].priority:
+        if parent >= 0 and priority < self.array[parent].priority:
             self.swap(parent, current)
-            current = self._parent(current)
-            parent = self._parent(current)
+            self._shift_node_up(parent)
 
     def swap(self, pos_1: int, pos_2: int):
         """
@@ -126,6 +128,6 @@ if __name__ == "__main__":
 
     print(p)
 
-    for i in range(0, 10):
+    for i in range(0, 40):
         print(p.remove())
 

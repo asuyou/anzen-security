@@ -33,8 +33,8 @@ class Main:
             address = email["address"] 
             self.emails.insert(address, priority)
 
-        # self.emailClient = EmailClient(sender_email, email_server, email_port)
-        # self.emailClient.login(sender_name, sender_pwd)
+        self.emailClient = EmailClient(sender_email, email_server, email_port)
+        self.emailClient.login(sender_name, sender_pwd)
 
         self.tasks = set()
 
@@ -58,8 +58,6 @@ class Main:
             await task
 
     async def handle_event(self, event: events_pb2.Event):
-        print("event")
-        print(event)
         if event.arm_status != ARM_STATUS_ARMED:
             return
 
@@ -68,13 +66,10 @@ class Main:
         data = await self.client.info()
         
         if data.armed:
-            print("Armed")
-            # await self.dispatch_emails(event)
-        print("event-end")
+            # pass
+            await self.dispatch_emails(event)
 
     async def handle_command(self, command: commands_pb2.Command):
-        print("command")
-        print(command)
         if command.command_type != commands_pb2.COMMAND_TYPE_INFO:
             return
 
@@ -83,8 +78,6 @@ class Main:
         command_type = data.get("request")
         priority = data.get("priority")
         email = data.get("email")
-
-        print("command-end")
 
         if not command_type or not priority or not email:
             print(f"{data} does not contain required data")
@@ -107,8 +100,8 @@ class Main:
         Extra data: {event.extra_data}
         """
         
-        # while (email := queue_copy.remove()) != None:
-        #     self.emailClient.send_email([email], "Triggered security event", message)
+        while (email := queue_copy.remove()) != None:
+            self.emailClient.send_email([email], "Triggered security event", message)
 
 async def main():
     main = Main()

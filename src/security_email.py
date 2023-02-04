@@ -2,17 +2,15 @@ import smtplib
 import datetime
 from email.mime.text import MIMEText
 
+# Documentation used:
+# https://docs.python.org/3/library/smtplib.html
+
 class EmailClient:
     def __init__(self, sender_email: str, server: str, port: int) -> None:
-        print("Start 1")
         smtp = smtplib.SMTP(host=server, port=port)
-
-        print("connected")
 
         smtp.ehlo()
         smtp.starttls()
-
-        print("tls on")
 
         self.sender_email = sender_email
 
@@ -20,7 +18,6 @@ class EmailClient:
 
     def login(self, user: str, password: str):
         self.smtp.login(user=user, password=password)
-        print("Logged in")
 
     def send_email(self, recipients: list[str], sub: str, message: str):
         current_date_time = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
@@ -36,7 +33,6 @@ class EmailClient:
         
         try:
             self.smtp.sendmail(from_addr=self.sender_email, to_addrs=joined_emails, msg=email_body.as_string())
-            print("Sent email")
         except Exception as e:
             print("Unable to send email. Are you connected to the email server?")
             print(e)
