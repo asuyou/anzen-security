@@ -1,5 +1,6 @@
 import json
 import pretty_errors
+import time
 import asyncio
 from anzen.v1 import commands_pb2, events_pb2, plugins_pb2
 from anzen.v1.data_pb2 import ARM_STATUS_ARMED
@@ -61,12 +62,13 @@ class Main:
         if event.arm_status != ARM_STATUS_ARMED:
             return
 
-        await asyncio.sleep(120)
+        print("waiting")
+        time.sleep(10)
+        print("finished waiting")
         
         data = await self.client.info()
         
         if data.armed:
-            # pass
             await self.dispatch_emails(event)
 
     async def handle_command(self, command: commands_pb2.Command):
@@ -105,6 +107,7 @@ class Main:
 
 async def main():
     main = Main()
+    print("[+] Security Init")
     make_event = asyncio.create_task(main.handle_all())
     run_task = asyncio.create_task(main.run_tasks())
     await run_task
